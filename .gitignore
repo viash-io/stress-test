@@ -1,0 +1,4 @@
+target
+.nextflow*
+work
+trace.log

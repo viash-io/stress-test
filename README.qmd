@@ -1,0 +1,65 @@
+---
+title: stress-test
+format: gfm
+engine: knitr
+---
+
+This pipeline is used to stress test the Nextflow execution engine. It runs a series of tasks that consume a large amount of memory, disk space, and time to see which exit codes are returned.
+
+## Stress test code
+
+Build components
+
+```{bash build}
+viash ns build --setup cb
+```
+
+Clean up previous runs
+
+```{bash remove, echo=FALSE}
+if [[ -d work ]]; then
+   rm -rf work .nextflow* trace.log
+fi
+```
+
+Create a parameter file
+
+```{bash params}
+cat > /tmp/params.yaml <<EOF
+param_list:
+  - id: memory
+    mode: memory
+  - id: time
+    mode: time
+  - id: disk
+    mode: disk
+EOF
+```
+
+Run the pipeline
+
+```{bash run}
+nextflow run target/nextflow/stress/main.nf \
+  -profile docker,no_publish \
+  -params-file /tmp/params.yaml \
+  -with-trace trace.log
+```
+
+## Check outputs
+
+```{bash print, results="asis", echo=FALSE, warning=FALSE, message=FALSE}
+# find .exitcode files
+for file in work/*/*/.exitcode; do
+  dir=`dirname $file`
+  echo "### Run $dir"
+  echo ""
+  echo "Exit code: `cat $file`"
+  echo ""
+  echo "Log:"
+  echo '```'
+  cat "$dir/.command.out"
+  echo '```'
+  echo ""
+
+done
+```

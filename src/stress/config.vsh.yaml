@@ -1,0 +1,46 @@
+functionality:
+  name: stress
+  arguments:
+    - type: string
+      name: --mode
+      description: "Mode of operation"
+      choices: [memory, disk, time]
+      required: true
+    - type: string
+      name: --duration
+      description: "Duration of the test in seconds"
+      required: false
+      default: "20"
+    - type: string
+      name: --disk_size
+      description: "Size of the disk"
+      required: false
+      default: 100MB
+    - type: string
+      name: --memory_size
+      description: "Size of the memory"
+      required: false
+      default: 100MB
+    - type: file
+      name: --output
+      description: "Output file"
+      required: false
+      direction: output
+      default: "stress.out"
+  resources:
+    - type: bash_script
+      path: script.sh
+platforms:
+  - type: docker
+    image: alpine
+    setup:
+      - type: apk
+        packages: [bash, stress-ng, psutils]
+  - type: nextflow
+    directives:
+      disk: "10 MB"
+      memory: "10 MB"
+      time: "5s"
+      cpus: 1
+      errorStrategy: ignore
+      tag: "${id}"
